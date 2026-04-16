@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lab2/app_theme.dart';
 import 'package:material_floating_search_bar_plus/material_floating_search_bar_plus.dart';
 
-class CustomSearchBar extends StatelessWidget {
+class CustomSearchBar extends StatefulWidget {
   final List<Widget>? leadingActions;
   final List<Widget>? trailingActions;
   final OnQueryChangedCallback? onSubmitted;
@@ -15,17 +15,40 @@ class CustomSearchBar extends StatelessWidget {
   });
 
   @override
+  State<CustomSearchBar> createState() => _CustomSearchBarState();
+}
+
+class _CustomSearchBarState extends State<CustomSearchBar> {
+  late final FloatingSearchBarController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = FloatingSearchBarController();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     // final isPortrait = MediaQuery.of(context).orientation == Orientation.portrait;
 
     return FloatingSearchBar(
       hint: 'Search...',
+      controller: _controller,
       automaticallyImplyBackButton: false,
       scrollPadding: const EdgeInsets.only(
         top: AppTheme.paddingMedium,
         bottom: AppTheme.paddingMedium,
       ),
-      onSubmitted: onSubmitted,
+      clearQueryOnClose: false,
+      automaticallyImplyDrawerHamburger: false,
+      closeOnBackdropTap: false,
+      onSubmitted: widget.onSubmitted,
       // transitionDuration: const Duration(milliseconds: 800),
       // transitionCurve: Curves.easeInOut,
       backdropColor: Colors.transparent,
@@ -34,13 +57,13 @@ class CustomSearchBar extends StatelessWidget {
       openAxisAlignment: 0.0,
       // width: isPortrait ? 600 : 500,
       debounceDelay: const Duration(milliseconds: 500),
-      onQueryChanged: onSubmitted,
-      leadingActions: leadingActions,
+      onQueryChanged: widget.onSubmitted,
+      leadingActions: widget.leadingActions,
       // Specify a custom transition to be used for
       // animating between opened and closed stated.
       transition: CircularFloatingSearchBarTransition(),
       actions: [
-        ...?trailingActions,
+        ...?widget.trailingActions,
         FloatingSearchBarAction.searchToClear(showIfClosed: false),
       ],
       builder: (context, transition) {

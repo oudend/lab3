@@ -125,10 +125,10 @@ Widget _instructionColumn(Recipe recipe) {
     crossAxisAlignment: CrossAxisAlignment.start,
     spacing: AppTheme.paddingMedium,
     children: [
-      for (String text in steps)
+      for (final (index, text) in steps.indexed)
         Text(
-          style: AppTheme.textTheme.bodyLarge?.copyWith(fontSize: 32),
-          "${text.trimLeft()}.",
+          style: AppTheme.textTheme.bodyLarge?.copyWith(fontSize: 26),
+          "${index + 1}. ${text.trimLeft()}.",
         ),
     ],
   );

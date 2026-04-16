@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -61,6 +62,8 @@ class RecipeHandler extends ChangeNotifier {
 
       candidates = fuzzyResults.map((e) => e.item).toList();
     }
+
+    await Future.delayed(Duration(milliseconds: Random().nextInt(1500)));
 
     return candidates;
   }

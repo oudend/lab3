@@ -31,26 +31,19 @@ class _MainViewState extends State<MainView> {
   String? _previousSearch;
   SearchFilter? _previousFilter;
 
-  Widget _buildMainBodyHelper({
+  Widget _buildMainBody({
     required BuildContext context,
     required bool collapsed,
     required VoidCallback onToggleCollapsed,
-    required List<Recipe>? recipes,
   }) {
     return Scaffold(
       body: Stack(
         fit: StackFit.expand,
         children: [
-          RecipeGrid(
-            recipes: recipes,
-            onTap: (recipe) {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => RecipeView(recipe: recipe)),
-              );
-            },
-          ),
+          _buildRecipeGrid(context: context),
           Center(
             child: CustomSearchBar(
+              key: ValueKey("search"),
               onSubmitted: (query) {
                 setState(() => _search = query.isEmpty ? null : query);
               },
@@ -81,38 +74,52 @@ class _MainViewState extends State<MainView> {
     );
   }
 
-  Widget _buildMainBody({
-    required BuildContext context,
-    required bool collapsed,
-    required VoidCallback onToggleCollapsed,
-  }) {
+  Widget _buildRecipeGrid({required BuildContext context}) {
     RecipeHandler recipeHandler = context.watch<RecipeHandler>();
 
     if (_previousSearch == _search && _previousFilter == _filter) {
-      return _buildMainBodyHelper(
-        collapsed: collapsed,
-        context: context,
-        onToggleCollapsed: onToggleCollapsed,
+      // return _buildMainBodyHelper(
+      //   collapsed: collapsed,
+      //   context: context,
+      //   onToggleCollapsed: onToggleCollapsed,
+      //   recipes: _cachedRecipes,
+      // );
+
+      return RecipeGrid(
         recipes: _cachedRecipes,
+        onTap: (recipe) {
+          Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (_) => RecipeView(recipe: recipe)));
+        },
       );
     }
 
     return FutureBuilder<List<Recipe>>(
       future: recipeHandler.matchRecipes(filter: _filter, text: _search),
       builder: (context, snapshot) {
-        final recipes = snapshot.data;
+        var recipes = snapshot.data;
 
-        if (snapshot.hasData && recipeHandler.loaded) {
-          _cachedRecipes = List.from(recipes!);
+        if (snapshot.connectionState != ConnectionState.done) {
+          recipes = null;
+        }
+
+        if (snapshot.hasData &&
+            recipeHandler.loaded &&
+            snapshot.connectionState == ConnectionState.done &&
+            recipes != null) {
+          _cachedRecipes = List.from(recipes);
           _previousFilter = _filter;
           _previousSearch = _search;
         }
 
-        return _buildMainBodyHelper(
-          collapsed: collapsed,
-          context: context,
-          onToggleCollapsed: onToggleCollapsed,
+        return RecipeGrid(
           recipes: recipes,
+          onTap: (recipe) {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => RecipeView(recipe: recipe)),
+            );
+          },
         );
       },
     );
